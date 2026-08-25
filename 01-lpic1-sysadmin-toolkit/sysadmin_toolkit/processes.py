@@ -18,9 +18,9 @@ STATE_NAMES = {
 
 def _read_stat(pid_dir):
     text = (pid_dir / "stat").read_text()
-    # comm can contain spaces/parens, so split on the last ')' instead of whitespace
-    _, _, rest = text.partition(")")
+    # comm can contain spaces/parens itself, so split on the LAST ')' not the first
     comm = text[text.index("(") + 1:text.rindex(")")]
+    rest = text[text.rindex(")") + 1:]
     fields = rest.split()
     return {
         "pid": int(pid_dir.name),
