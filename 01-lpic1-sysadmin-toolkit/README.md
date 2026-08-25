@@ -14,6 +14,8 @@ as revision.
   security sensitive files, broken symlink finder, inode usage
 - `logs.py` - parses SSH auth logs for failed/accepted login attempts, summarizes the
   worst offending IPs and usernames
+- `processes.py` - process listing and info straight from `/proc`, zombie process
+  finder, top memory consumers, basic signal sending
 
 ## Usage
 
@@ -24,6 +26,7 @@ python -m sysadmin_toolkit.cli packages
 python -m sysadmin_toolkit.cli boot
 python -m sysadmin_toolkit.cli fs --symlink-root /etc
 python -m sysadmin_toolkit.cli logs --log-path /var/log/auth.log
+python -m sysadmin_toolkit.cli processes --top 10
 python -m sysadmin_toolkit.cli all
 ```
 

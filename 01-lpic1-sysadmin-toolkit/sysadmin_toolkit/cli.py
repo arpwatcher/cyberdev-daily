@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from sysadmin_toolkit import boot, filesystem, hardware, logs, packages
+from sysadmin_toolkit import boot, filesystem, hardware, logs, packages, processes
 
 
 def cmd_hardware(args):
@@ -79,6 +79,20 @@ def cmd_logs(args):
         print(f"  {user}: {count}")
 
 
+def cmd_processes(args):
+    procs = processes.list_processes()
+    print(f"Total processes: {len(procs)}")
+
+    zombies = processes.find_zombies()
+    print(f"Zombie processes: {len(zombies)}")
+    for z in zombies:
+        print(f"  pid {z['pid']} ({z['comm']}), ppid {z['ppid']}")
+
+    print(f"\nTop {args.top} by memory:")
+    for proc in processes.top_memory_consumers(args.top):
+        print(f"  pid {proc['pid']} {proc['comm']}: {proc['rss_kb']} kB")
+
+
 def cmd_all(args):
     for fn in (cmd_hardware, cmd_packages, cmd_boot, cmd_fs):
         print("=" * 40)
@@ -103,6 +117,10 @@ def build_parser():
     logs_parser = sub.add_parser("logs", help="auth log analysis")
     logs_parser.add_argument("--log-path", default="/var/log/auth.log")
     logs_parser.set_defaults(func=cmd_logs)
+
+    proc_parser = sub.add_parser("processes", help="process listing, zombies, top memory users")
+    proc_parser.add_argument("--top", type=int, default=10, help="how many top memory consumers to show")
+    proc_parser.set_defaults(func=cmd_processes)
 
     all_parser = sub.add_parser("all", help="run hardware, packages, boot and fs")
     all_parser.add_argument("--symlink-root", default="/etc")
