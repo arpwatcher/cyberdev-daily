@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from sysadmin_toolkit import boot, filesystem, hardware, logs, packages, processes
+from sysadmin_toolkit import boot, filesystem, hardware, libraries, logs, packages, processes, textproc
 
 
 def cmd_hardware(args):
@@ -93,6 +93,28 @@ def cmd_processes(args):
         print(f"  pid {proc['pid']} {proc['comm']}: {proc['rss_kb']} kB")
 
 
+def cmd_libs(args):
+    deps = libraries.check_dependencies(args.binary)
+    print(f"Dependencies for {args.binary}:")
+    for dep in deps:
+        status = "ok" if dep["resolved"] else "MISSING"
+        print(f"  {dep['name']}: {status}")
+
+    missing = [d for d in deps if not d["resolved"]]
+    if missing:
+        print(f"\n{len(missing)} unresolved dependencies")
+
+    print("\nld.so.conf search paths:")
+    for entry in libraries.get_search_paths():
+        marker = "" if entry["exists"] else " (missing)"
+        print(f"  {entry['path']}{marker}")
+
+
+def cmd_words(args):
+    for word, count in textproc.word_frequency(args.file, top_n=args.top):
+        print(f"  {word}: {count}")
+
+
 def cmd_all(args):
     for fn in (cmd_hardware, cmd_packages, cmd_boot, cmd_fs):
         print("=" * 40)
@@ -121,6 +143,15 @@ def build_parser():
     proc_parser = sub.add_parser("processes", help="process listing, zombies, top memory users")
     proc_parser.add_argument("--top", type=int, default=10, help="how many top memory consumers to show")
     proc_parser.set_defaults(func=cmd_processes)
+
+    libs_parser = sub.add_parser("libs", help="shared library dependency check")
+    libs_parser.add_argument("--binary", default="/bin/ls", help="binary to check with ldd")
+    libs_parser.set_defaults(func=cmd_libs)
+
+    words_parser = sub.add_parser("words", help="word frequency count for a text file")
+    words_parser.add_argument("--file", required=True)
+    words_parser.add_argument("--top", type=int, default=10)
+    words_parser.set_defaults(func=cmd_words)
 
     all_parser = sub.add_parser("all", help="run hardware, packages, boot and fs")
     all_parser.add_argument("--symlink-root", default="/etc")
