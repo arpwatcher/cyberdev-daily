@@ -16,6 +16,10 @@ as revision.
   worst offending IPs and usernames
 - `processes.py` - process listing and info straight from `/proc`, zombie process
   finder, top memory consumers, basic signal sending
+- `libraries.py` - shared library dependency checks via ldd, ldconfig cache parsing
+  and search, ld.so.conf search path validation
+- `textproc.py` - word frequency counting, line deduping, a small grep with context
+  lines, column extraction (cut-style)
 
 ## Usage
 
@@ -27,6 +31,8 @@ python -m sysadmin_toolkit.cli boot
 python -m sysadmin_toolkit.cli fs --symlink-root /etc
 python -m sysadmin_toolkit.cli logs --log-path /var/log/auth.log
 python -m sysadmin_toolkit.cli processes --top 10
+python -m sysadmin_toolkit.cli libs --binary /bin/ls
+python -m sysadmin_toolkit.cli words --file some_file.txt --top 10
 python -m sysadmin_toolkit.cli all
 ```
 

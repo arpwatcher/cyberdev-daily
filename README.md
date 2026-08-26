@@ -7,7 +7,8 @@ studying at the time.
 ## Roadmap
 
 1. **LPIC-1 (101-500)** - Linux system administration - in progress
-   - `01-lpic1-sysadmin-toolkit` - CLI toolkit covering hardware, packages, boot, filesystem, logs
+   - `01-lpic1-sysadmin-toolkit` - CLI toolkit covering hardware, packages, boot, filesystem,
+     logs, processes, shared libraries, text processing
 2. **CCNA** - networking - not started
 3. **Security+ / Wireshark** - security fundamentals and packet analysis - not started
 4. **TryHackMe rooms** - ongoing alongside the above, not started
