@@ -6,10 +6,12 @@ studying at the time.
 
 ## Roadmap
 
-1. **LPIC-1 (101-500)** - Linux system administration - in progress
+1. **LPIC-1 (101-500)** - Linux system administration - done
    - `01-lpic1-sysadmin-toolkit` - CLI toolkit covering hardware, packages, boot, filesystem,
      logs, processes, shared libraries, text processing
-2. **CCNA** - networking - not started
+2. **CCNA** - networking - in progress
+   - `02-ccna-network-toolkit` - subnet/VLSM calculator, ip classification, subnet math
+     done from scratch. config parsing and topology analysis still to come
 3. **Security+ / Wireshark** - security fundamentals and packet analysis - not started
 4. **TryHackMe rooms** - ongoing alongside the above, not started
 5. **C/C++ hardware projects** - side track, optional, not started
