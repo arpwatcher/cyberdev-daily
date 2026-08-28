@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from netcalc import ipaddr, subnetting, vlsm
+from netcalc import config_parser, ipaddr, subnetting, topology, vlsm
 
 
 def cmd_info(args):
@@ -43,6 +43,43 @@ def cmd_vlsm(args):
     return 0
 
 
+def cmd_parse_config(args):
+    config = config_parser.parse_config(open(args.config).read())
+    print(f"hostname: {config['hostname'] or '(none)'}")
+    print("\ninterfaces:")
+    for iface in config["interfaces"]:
+        status = "shutdown" if iface["shutdown"] else "up"
+        ip_part = f"{iface['ip_address']} {iface['netmask']}" if iface["ip_address"] else "no ip"
+        print(f"  {iface['name']}: {ip_part} ({status})")
+    if config["vlans"]:
+        print("\nvlans:")
+        for vlan in config["vlans"]:
+            print(f"  {vlan['id']}: {vlan['name'] or '(unnamed)'}")
+
+
+def cmd_conflicts(args):
+    devices = topology.load_devices_from_dir(args.config_dir)
+    conflicts = topology.find_ip_conflicts(devices)
+    if not conflicts:
+        print("no ip conflicts found")
+        return
+    for c in conflicts:
+        where = ", ".join(f"{a['device']}:{a['interface']}" for a in c["assignments"])
+        print(f"  {c['ip_address']} assigned on: {where}")
+
+
+def cmd_overlaps(args):
+    devices = topology.load_devices_from_dir(args.config_dir)
+    overlaps = topology.find_subnet_overlaps(devices)
+    if not overlaps:
+        print("no subnet overlaps found")
+        return
+    for o in overlaps:
+        a, b = o["a"], o["b"]
+        print(f"  {a['device']} {a['network']}/{a['prefix_len']} overlaps "
+              f"{b['device']} {b['network']}/{b['prefix_len']}")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="netcalc", description="subnet and vlsm calculator for ccna study",
@@ -60,6 +97,18 @@ def build_parser():
     vlsm_parser.add_argument("hosts", nargs="+", help="name:host_count pairs, e.g. sales:50")
     vlsm_parser.set_defaults(func=cmd_vlsm)
 
+    config_parser_cmd = sub.add_parser("parse-config", help="parse a cisco-style config file")
+    config_parser_cmd.add_argument("config")
+    config_parser_cmd.set_defaults(func=cmd_parse_config)
+
+    conflicts_parser = sub.add_parser("conflicts", help="find duplicate ips across a directory of configs")
+    conflicts_parser.add_argument("config_dir")
+    conflicts_parser.set_defaults(func=cmd_conflicts)
+
+    overlaps_parser = sub.add_parser("overlaps", help="find overlapping subnets across a directory of configs")
+    overlaps_parser.add_argument("config_dir")
+    overlaps_parser.set_defaults(func=cmd_overlaps)
+
     return parser
 
 
@@ -68,7 +117,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         return args.func(args) or 0
-    except ValueError as exc:
+    except (ValueError, FileNotFoundError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
