@@ -14,8 +14,8 @@ studying at the time.
      config parsing, cross-device topology checks (ip conflicts, subnet overlaps)
 3. **Security+ / Wireshark** - security fundamentals and packet analysis - in progress
    - `03-security-plus-toolkit` - password strength scoring, hash identification, x509
-     certificate auditing. packet analysis side of this is a separate repo, see
-     https://github.com/arpwatcher/pcap-toolkit
+     certificate auditing, firewall rule review, ioc hash lookup. packet analysis side of
+     this is a separate repo, see https://github.com/arpwatcher/pcap-toolkit
 4. **TryHackMe rooms** - ongoing alongside the above, not started
 5. **C/C++ hardware projects** - side track, optional, not started
 
