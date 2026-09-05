@@ -1,0 +1,38 @@
+# privesc-enum-toolkit
+
+Linux privilege escalation enumeration, the kind of checks you'd run by hand on a
+tryhackme box or during an actual pentest, built into a small tool instead of copy-pasting
+one-liners. Ties into the LPIC-1 system knowledge from `01-lpic1-sysadmin-toolkit` - same
+territory, different angle (finding what's wrong instead of just inspecting).
+
+- `suid.py` - walks a directory tree for setuid/setgid binaries and flags anything outside
+  a common baseline (passwd, sudo, su and the like are expected; something in /tmp with
+  the suid bit set is not)
+- `sudo_perms.py` - parses `sudo -l` output and flags the blanket `ALL` permission plus
+  any binary with a well known gtfobins-style sudo shell escape (vim, find, python, awk,
+  and a dozen others that show up constantly on ctf boxes)
+- `cron.py` - parses crontab entries (both `/etc/crontab` style with a user field and
+  `crontab -l` style without) and flags jobs that run a world-writable script, or a script
+  sitting in a world-writable directory - if you can edit what root's cron job runs, you
+  get root the next time it fires
+
+## Usage
+
+```
+cd 04-privesc-enum-toolkit
+python -m privesc.cli suid /
+python -m privesc.cli sudo sudo_l_output.txt
+python -m privesc.cli cron /etc/crontab
+python -m privesc.cli cron ~/mycrontab --user-format
+```
+
+## Tests
+
+```
+pip install pytest
+pytest
+```
+
+21 tests. The suid and cron checks run against real files with real permission bits set
+in a temp directory (not mocked stat results), so they're exercising the actual filesystem
+checks, not just the parsing logic.

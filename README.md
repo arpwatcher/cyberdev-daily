@@ -16,7 +16,9 @@ studying at the time.
    - `03-security-plus-toolkit` - password strength scoring, hash identification, x509
      certificate auditing, firewall rule review, ioc hash lookup. packet analysis side of
      this is a separate repo, see https://github.com/arpwatcher/pcap-toolkit
-4. **TryHackMe rooms** - ongoing alongside the above, not started
+4. **TryHackMe rooms** - ongoing alongside the above, in progress
+   - `04-privesc-enum-toolkit` - linux privilege escalation enumeration: suid/sgid
+     scanner, sudo permission auditor, cron job writable-target scanner
 5. **C/C++ hardware projects** - side track, optional, not started
 
 ## Notes
