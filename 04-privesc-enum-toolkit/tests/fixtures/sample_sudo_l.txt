@@ -1,0 +1,8 @@
+Matching Defaults entries for user on host:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin
+
+User user may run the following commands on host:
+    (root) NOPASSWD: /usr/bin/vim
+    (root) NOPASSWD: /usr/bin/find
+    (root) /usr/bin/systemctl restart nginx
+    (ALL : ALL) ALL
