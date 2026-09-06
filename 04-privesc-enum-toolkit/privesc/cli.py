@@ -1,9 +1,10 @@
 """Entry point for privilege escalation enumeration checks."""
 
 import argparse
+import os
 import sys
 
-from privesc import cron, sudo_perms, suid
+from privesc import capabilities, cron, path_check, sudo_perms, suid
 
 
 def cmd_suid(args):
@@ -53,6 +54,38 @@ def cmd_cron(args):
         print("\nno writable cron targets found")
 
 
+def cmd_path(args):
+    path_str = args.path or os.environ.get("PATH", "")
+    dirs = path_check.parse_path(path_str)
+    binaries = args.binaries.split(",") if args.binaries else ["sudo", "python3", "bash", "ls"]
+
+    writable = path_check.find_writable_dirs(dirs)
+    print(f"{len(dirs)} directories in PATH, {len(writable)} writable")
+    for d in writable:
+        print(f"  writable: {d}")
+
+    findings = path_check.find_hijackable_binaries(dirs, binaries)
+    if findings:
+        print("\nhijackable binaries:")
+        for f in findings:
+            print(f"  {f['binary']} could be shadowed from {f['writable_dir']}")
+    else:
+        print("\nno hijackable binaries found among checked names")
+
+
+def cmd_caps(args):
+    entries = capabilities.parse_getcap_output(open(args.getcap_output).read())
+    print(f"{len(entries)} binaries with capabilities")
+
+    findings = capabilities.flag_dangerous(entries)
+    if findings:
+        print("\ndangerous capabilities found:")
+        for f in findings:
+            print(f"  {f['path']}: {', '.join(f['dangerous_caps'])}")
+    else:
+        print("\nno dangerous capabilities found")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(prog="privesc", description="linux privesc enumeration toolkit")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -70,6 +103,15 @@ def build_parser():
     cron_parser.add_argument("--user-format", action="store_true",
                               help="parse as a user crontab (no user field) instead of /etc/crontab style")
     cron_parser.set_defaults(func=cmd_cron)
+
+    path_parser = sub.add_parser("path", help="check PATH for directory-order hijacking")
+    path_parser.add_argument("--path", help="PATH string to check, defaults to the current environment's")
+    path_parser.add_argument("--binaries", help="comma separated binary names to check")
+    path_parser.set_defaults(func=cmd_path)
+
+    caps_parser = sub.add_parser("caps", help="audit getcap -r / output for dangerous capabilities")
+    caps_parser.add_argument("getcap_output", help="path to a file containing getcap -r / output")
+    caps_parser.set_defaults(func=cmd_caps)
 
     return parser
 
